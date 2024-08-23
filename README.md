@@ -26,7 +26,7 @@ molcontrol.py contains the following functions:
 
 Folders contain examples of using this code to analyze questions related to controlling the variability of singular molecules.
 
-Pytorch functions are only used for the neural net which was not used for most of the analyses done, so if there are issues installing PyTorch it can be removed from the molcontrol.py file without any issues.
+PyTorch functions are only used for the neural net which was not used for most of the analyses done, so if there are issues installing PyTorch it can be removed from the molcontrol.py file without any issues.
 
 # Purpose
 
