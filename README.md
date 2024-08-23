@@ -8,7 +8,7 @@ It also contains example programs used to investigate the utility of reinforceme
 
 __Above__: A diagram of the stochastic simulation. At each timestep, molecules decay with probability $p$ resulting in a binomial distribution of death events, and a controller attempts to maintain a constant average by sending in inputs based off a series of past observations of the molecular levels.
 
-This work is based off knowledge in the stochastic molecular dynamics community that [control schemes based on the entire history of molecular levels offer superior performance to controllers that only act based on instantaneous values](https://www.nature.com/articles/nature09333). These control mechanisms are difficult to derive analytically. Instead, we implemented a history-dependent control mechanism via reinforcement learning. Compared to the lagg-free optimal controller for this problem, we find the variance of a delayed controller can be reduced by up to 14% by predicting based off the past 3 observations instead of only the most recent value.
+This work is based off knowledge in the stochastic molecular dynamics community that [control schemes based on the entire history of molecular levels offer superior performance to controllers that only act based on instantaneous values.](https://www.nature.com/articles/nature09333) These control mechanisms are difficult to derive analytically. Instead, we implemented a history-dependent control mechanism via reinforcement learning. Compared to the lagg-free optimal controller for this problem, we find the variance of a delayed controller can be reduced by up to 14% by predicting based off the past 3 observations instead of only the most recent value.
 
 ![Comparison of Avg5 dt05](Images/Comparison_Of_Avg5_dt05.png)
 
@@ -21,7 +21,7 @@ molcontrol.py contains the following functions:
 - Gym environment for running a molecular simulation subject to stochastic death events
 - Creates and trains a PyTorch neural network with replay memory
 - Runs the analytically computed optimal controller for this simulation
-- Trains a lookup table on the gym environment for arbitrary training data (allowing for delayed controllers that use histories)
+- Trains a lookup table on the environment for arbitrary training data (allowing for delayed controllers that use histories)
 - Visualizations for training results
 
 Folders contain examples of using this code to analyze questions related to controlling the variability of singular molecules.
@@ -30,7 +30,7 @@ PyTorch functions are only used for the neural net which was not used for most o
 
 # Purpose
 
-Reducing variability is a common goal in many control applications. In this repo, we analyze the properties of near-optimal controllers for a discrete time process where a finite number of molecules randomly decay between timesteps with probability $p$. The controller only sees the number of molecules at the current timestep $N_k$ (or potentially a number of pevious timesteps $N_{k -1}, N_{k - 2}...$) and must decide upon the optimal amount of number of molecules to be produced in the next step to ensure that the observed number of molecules at the next timestep is as close to a target $B$ as possible, with the goal being the minimize the error, given by the squared differenece between the number of molecules and the target.
+Reducing variability is a common goal in many control applications. In this repo, we analyze the properties of near-optimal controllers for a discrete time process where a finite number of molecules randomly decay between timesteps with probability $p$. The controller only sees the number of molecules at the current timestep $N_k$ (or potentially a number of pevious timesteps $N_{k -1}, N_{k - 2}...$) and must decide upon the optimal amount of number of molecules to be produced in the next step to ensure that the observed number of molecules at the next timestep is as close to a target $B$ as possible, with the goal being the minimize the error, given by the squared difference between the number of molecules and the target.
 
 This problem can be analytically solved in the case where the controller observes exactly the current number of molecules before making it's decision for the next timestep, where the optimal number of molecules to send in at timestep k, $A_k$ is given by the closest integer to
 
@@ -44,11 +44,11 @@ Such controllers are difficult to analytically solve for. Instead, we implement 
 
 ## Near Optimal Controllers with Reinforcement Learning
 
-Reinforcement learning is a branch of machine learning concerned with teaching agents to solve problems by providing them with rewards and punishments based off performance. We use it here to create a controller that will take in as input a history of the past molecular observations, and output the number of molecules it believes should be added into the system at this timestep. 
+Reinforcement learning is a branch of machine learning concerned with teaching agents to solve problems by providing them with rewards and punishments based off performance. We use it to create a controller that takes in the history of the past molecular observations, and output a number of molecules to add to the system to minimize the error from the target value. 
 
 ### Environment
 
-Reinforcement learning requires an environment - in this case, a simulation of the system to learn from. We implemented this system in pythons gymnasium library, a standard library for reinforcement learning algorithms. Our environment takes in 
+Reinforcement learning requires an environment - here, a simulation of the system to learn from. We implemented this simulation in pythons gymnasium library, a standard library for reinforcement learning algorithms. Our environment takes in 
 
 - Initial number of molecules
 - Average molecule lifetime $t_{mol}$
@@ -58,7 +58,7 @@ Reinforcement learning requires an environment - in this case, a simulation of t
 - The target value
 - The maximum number of molecules allowed in the system
 
-which is used to compute the probability a molecule does not decay $p = exp(-dt/t_{mol})$. At every step, it takes in an action by the controller, and computes the number of molecules that have decayed since the last observation (drawn from a binomial with probability $p$ before adding in the action. It returns the history of the molecules abundances, the reward (negative squared difference between the current value and the target), and the actual optimal number of molecules to send in, along with some generic flags for gymnasium libraries.
+which is used to compute the probability a molecule does not decay $p = exp(-dt/t_{mol})$. At every step, it takes an action by the controller, and computes the number of molecules that have decayed since the last observation (drawn from a binomial with probability $p$ before adding in the action. It returns the history of the molecules abundances, the reward (negative squared difference between the current value and the target), and the actual optimal number of molecules to send in, along with some generic flags for gymnasium libraries.
 
 ### Neural Networks
 
@@ -76,7 +76,7 @@ An alternative to using neural networks is lookup tables. Unlike networks, they 
 
 ![Lookup_Tables_get_better](Images/Lookup_Tables_get_better.png)
 
-__Above__: Compared to the optimal controller (black), the lookup table steadily gets better over time. Additionally, it is much faster in training and prediction.
+__Above__: Compared to the optimal controller (black), the lookup table steadily gets better over time. Additionally, it is faster in training and prediction.
 
 For details, see "Lookup Tables.ipynb".
 
@@ -128,7 +128,7 @@ The case studied here is a delayed controller: it's actions will not be enacted 
 
 ![lag_Makes_Worse_Controllers_dt05](Images/lag_Makes_Worse_Controllers_dt05.png)
 
-__Above__: Forcing our controller's actions to be delayed by one or two timesteps results in worse performance in controlling the variability, shown by the blue and red curves lying above the black curve. The new curves are obtained by running our machine learning algorithm using most recent observation (one or two timesteps ago) available to the controller.
+__Above__: Forcing our controller's actions to be delayed by one or two timesteps results in worse performance in controlling the variability, shown by the blue and red curves lying above the black curve. The new curves are obtained by running our machine learning algorithm using the most recent observation (one or two timesteps ago) available to the controller.
 
 ### History Dependent Machine Learning Controllers Can Improve Performance
 
@@ -140,7 +140,7 @@ __Above__: Our controller's actions are now influenced by both observations it h
 
 ![lag1_With_History_dt05](Images/lag1_With_History_dt05.png)
 
-__Above__: The controllers using additional observations (History 1, 2, and 1 2) perform somewhat better than the controller trained on only the latest observation, but the more complex controllers do worse at larger averages, suggesting that they require more training time (because of the larger state space for larger averages and complex controllers). We can more accurately evaluate the performance gain from history dependent controllers by comparing the results at a small average, such as an average of 5:
+__Above__: The controllers using additional observations (History 1, 2, and 1 2) perform better than the controller trained on only the latest observation, but the more complex controllers do worse at larger averages, suggesting that they require more training time (because of the larger state space for larger averages and complex controllers). We can more accurately evaluate the performance gain from history dependent controllers by comparing the results at a small average, such as an average of 5:
 
 ![Comparison_Of_Avg5_dt05](Images/Comparison_Of_Avg5_dt05.png)
 
@@ -148,7 +148,7 @@ __Above__: The controllers using additional observations (History 1, 2, and 1 2)
 
 The effect of a history dependent controller reduced the variability from  1.82  to  1.752. The minimal variability for this average and temporal resolution with a controller without any delay is 1.28. The effect of using histories in our machine learning algorithm has reduced the error from this optimal performance from 0.42 to 0.37, resulting in a 14% improvement from using histories.
 
-In general, investigating other average lengths results in a performance of slightly less, around 5% (which can be attributed to the longer training times needed for our controller to learn more complex control schemes).
+In general, investigating other average lengths results in slightly lower performance, around 5%. This may be due to insufficient training (longer training times are needed for our controller to learn more complex control schemes).
 
 # Future Steps
 
