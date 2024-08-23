@@ -1,10 +1,12 @@
 # Introduction
 
-This repo contains code for implementing a 1D stochastic molecule simulation with discretized time in the gymnasium environment, allowing one to use reinforcement learning to investigate the properties of near-optimal controllers. It also contains several example programs used to investigate the utility of reinforcement learning in understanding control of stochastic molecular dynamics.
+This repo contains code for implementing a 1D stochastic molecule simulation with discretized time in the gymnasium environment. This allows one to use reinforcement learning to investigate the properties of near-optimal controllers.
 
-It is known in the literature for stochastic molecular dynamics that [control schemes based on the entire history of molecular levels offer superior performance to controllers that only act based on instantaneous values](https://www.nature.com/articles/nature09333), but such control mechanisms are difficult to derive analytically. Here, we show the improvements available from sampling molecular histories instead of instantaneous values by using reinforcement learning on the problem of delayed molecular controllers, where we find that the variance compared to a lagg-free controller can be reduced by up to 14% by predicting based off the past 3 observations instead of only the most recent value.
+It also contains example programs used to investigate the utility of reinforcement learning in understanding control of stochastic molecular dynamics.
 
-This is pictured in the following graph, showing that a control mechanism (learned via machine learning) with delays can more effectively approach the performance of the optimal no-delay controller by using histories of molecular trajectories.
+This work is based off knowledge in the stochastic molecular dynamics community that [control schemes based on the entire history of molecular levels offer superior performance to controllers that only act based on instantaneous values](https://www.nature.com/articles/nature09333). These control mechanisms are difficult to derive analytically. Instead, we implemented a history-dependent control mechanism via reinforcement learning. Compared to the lagg-free optimal controller for this problem, we find the variance of a delayed controller can be reduced by up to 14% by predicting based off the past 3 observations instead of only the most recent value.
+
+Our results are shown in the following graph, where a control mechanism (learned via machine learning) with delays can more effectively approach the performance of the optimal no-delay controller by using histories of molecular trajectories.
 
 ![Comparison of Avg5 dt05](Images/Comparison_Of_Avg5_dt05.png)
 
@@ -13,13 +15,14 @@ This is pictured in the following graph, showing that a control mechanism (learn
 molcontrol.py contains the following functions:
 
 - gymn environment for running a molecular simulation subject to stochastic death events
-- functions to create and train a PyTorch neural network with replay memory with this gym environment
-- functions to run the analytically computed optimal controller for this gym environment
+- functions to create and train a PyTorch neural network with replay memory
+- functions to run the analytically computed optimal controller for this simulation
 - functions to train a lookup table on the gym environment for arbitrary training data (allowing for delayed controllers that use histories)
-- some programs to visualize the results of the above training
+- functions to visualize the results of training
 
-In the folders contain examples of using this code to analyze various questions related to controlling the variability of singular molecules. The PyTorch functions are only used for the neural net which was not used for most of the analyses done, so if there are issues installing PyTorch it can be removed from the molcontrol.py file without any issues.
+Folders contain examples of using this code to analyze questions related to controlling the variability of singular molecules.
 
+Pytorch functions are only used for the neural net which was not used for most of the analyses done, so if there are issues installing PyTorch it can be removed from the molcontrol.py file without any issues.
 
 # Purpose
 
