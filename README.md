@@ -14,11 +14,11 @@ Our results are shown in the following graph, where a control mechanism (learned
 
 molcontrol.py contains the following functions:
 
-- gymn environment for running a molecular simulation subject to stochastic death events
-- functions to create and train a PyTorch neural network with replay memory
-- functions to run the analytically computed optimal controller for this simulation
-- functions to train a lookup table on the gym environment for arbitrary training data (allowing for delayed controllers that use histories)
-- functions to visualize the results of training
+- Gym environment for running a molecular simulation subject to stochastic death events
+- Creates and trains a PyTorch neural network with replay memory
+- Runs the analytically computed optimal controller for this simulation
+- Trains a lookup table on the gym environment for arbitrary training data (allowing for delayed controllers that use histories)
+- Visualizations for training results
 
 Folders contain examples of using this code to analyze questions related to controlling the variability of singular molecules.
 
@@ -26,7 +26,7 @@ Pytorch functions are only used for the neural net which was not used for most o
 
 # Purpose
 
-Reducing variability is a common goal in many control applications. In this program, we analyze the properties of near-optimal controllers for a discrete time process where a finite number of molecules randomly decay between timesteps with probability $p$. The controller only sees the number of molecules at the current timestep $N_k$ (or potentially a number of pevious timesteps $N_{k -1}, N_{k - 2}...$) and must decide upon the optimal amount of number of molecules to be produced in the next step to ensure that the observed number of molecules at the next timestep is as close to a target $B$ as possible, with the goal being the minimize the error, given by the squared differenece between the number of molecules and the target.
+Reducing variability is a common goal in many control applications. In this repo, we analyze the properties of near-optimal controllers for a discrete time process where a finite number of molecules randomly decay between timesteps with probability $p$. The controller only sees the number of molecules at the current timestep $N_k$ (or potentially a number of pevious timesteps $N_{k -1}, N_{k - 2}...$) and must decide upon the optimal amount of number of molecules to be produced in the next step to ensure that the observed number of molecules at the next timestep is as close to a target $B$ as possible, with the goal being the minimize the error, given by the squared differenece between the number of molecules and the target.
 
 This problem can be analytically solved in the case where the controller observes exactly the current number of molecules before making it's decision for the next timestep, where the optimal number of molecules to send in at timestep k, $A_k$ is given by the closest integer to
 
@@ -34,15 +34,15 @@ This problem can be analytically solved in the case where the controller observe
 A_{k, cont.} = B - N_{k}(1 - p)
 \end{equation}
 
-obtained by minimizing expected value of the squared difference. This result implies the number of molecules made should compensate for the average number of molecules lost. Unfortunately, analytically solving for the average error is difficult, and one must use numerical simulations. For the details of this solution, see the folder "Theoretical Results".
+obtained by minimizing expected value of the squared difference. This intuitively implies the number of molecules made should compensate for the average number of molecules lost. Unfortunately, analytically solving for the average error is difficult, and one must use numerical simulations. For the proof, see folder "Theoretical Results".
 
-Because this system is a markov chain, there is no increase in predicting future values of molecules given we know the current number of molecules. However, if our controller does not observe the most recent value of the abundance, but instead a lagged history of molecular abundances (while simultaneously receiving error estimates based on the current but invisible value), this markov property does not hold, and observing large histories of the current molecule may result in increased performance. 
+Because this system is a markov chain, there is no increase in predicting future values of molecules given we know the current number of molecules. However, if our controller does not observe the most recent value of the abundance, but instead a lagged history of molecular abundances (while simultaneously receiving error estimates based on the current but invisible value), the markov property does not hold, and observing large histories of the current molecule may result in increased performance. 
 
-Such controllers are difficult to analytically solve for. Instead, we implement a reinforcement learning algorithm to learn a near-optimal controller for us.
+Such controllers are difficult to analytically solve for. Instead, we implement a reinforcement learning algorithm to learn a near-optimal controller.
 
 ## Near Optimal Controllers with Reinforcement Learning
 
-Reinforcement learning is a branch of machine learning concerned with teaching agents to solve problems by providing them with rewards and punishments based off performance. We will use it here to create a controller that will take in as input a history of the past molecular observations, and output the number of molecules it believes should be added into the system at this timestep. 
+Reinforcement learning is a branch of machine learning concerned with teaching agents to solve problems by providing them with rewards and punishments based off performance. We use it here to create a controller that will take in as input a history of the past molecular observations, and output the number of molecules it believes should be added into the system at this timestep. 
 
 ### Environment
 
@@ -56,11 +56,11 @@ Reinforcement learning requires an environment - in this case, a simulation of t
 - the target value
 - the maximum number of molecules allowed in the system
 
-which is used to compute the probability a molecule does not decay $p = exp(-dt/t_{mol})$. At every step, it takes in an action by the controller, and computes the number of molecules that have decayed since the last observation (drawn from a binomial with probability $p$ before adding in the action, and returning the history of the molecules abundances, the reward (negative squared difference between the current value and the target), and the actual optimal number of molecules to send in, along with some generic flags for gymnasium libraries.
+which is used to compute the probability a molecule does not decay $p = exp(-dt/t_{mol})$. At every step, it takes in an action by the controller, and computes the number of molecules that have decayed since the last observation (drawn from a binomial with probability $p$ before adding in the action. It returns the history of the molecules abundances, the reward (negative squared difference between the current value and the target), and the actual optimal number of molecules to send in, along with some generic flags for gymnasium libraries.
 
 ### Neural Networks
 
-The network learns using the loss, given by the squared difference between the network's taken action and the optimal action. This network is capable of learning, but comparing it to the analytic optimal controller for this problem reveals that it consistently does worse than the optimal solution, and furthermore it's performance does not improve with more training. This is a common problem in the field of deep reinforcement learning, where increased amounts of training do not result in greater performance, as shown here by the departure of the neural net predictions from the optimal controller.
+The network learns using the loss, given by the squared difference between the network's taken action and the optimal action. This network is capable of learning, but comparing it to the analytic optimal controller for this problem reveals that it consistently does worse than the optimal solution, and furthermore it's performance does not improve with more training. This is a common problem in the field of deep reinforcement learning (catastrophic forgetting), where increased amounts of training do not result in greater performance, as shown here by the departure of the neural net predictions from the optimal controller.
 
 ![Neural_Nets_Get_Worse](Images/Neural_Nets_Get_Worse.png)
 
@@ -68,7 +68,7 @@ For details, see "Neural Nets.ipynb"
 
 ### Tabular Methods
 
-An alternative to using neural networks is lookup tables. Unlike networks, they cannot infer general principles and solve problems that they have never observed and are only suitable for small action spaces due to memory constraints, but in exchange they never undergo common issues with deep learning RL approaches such as catastrophic forgetting. Since the state space of our problem is relatively small and our interest is in producing near-optimal controllers, they work well for this problem.
+An alternative to using neural networks is lookup tables. Unlike networks, they cannot infer general principles and solve problems that they have never observed and are only suitable for small action spaces due to memory constraints, but in exchange they never undergo common issues with deep learning RL approaches such as catastrophic forgetting. Since the state space of our problem is relatively small and our interest is in producing near-optimal controllers, they work well here.
 
 ![Lookup_Tables_get_better](Images/Lookup_Tables_get_better.png)
 
@@ -80,7 +80,7 @@ Learning curves are not effective measures of performance in this problem, becau
 
 #### Averages
 
-The machine learning solution and the analytic optimal solution match closely. The variability rises linearly as a function of the average. The results are run for 10 different seeds to produce points with error bars.
+The machine learning solution based off lookup tables and the analytic optimal solution match closely. The variability rises linearly as a function of the average. The results are run for 10 different seeds to produce points with error bars. In contrast, the neural net solutions do not perform very well, as more training does not result in more accuracy.
 
 ![d05_comparison_analytic_model_net](Images/d05_comparison_analytic_model_net.png)
 
@@ -90,7 +90,7 @@ Instead of comparing our analytic solution with our machine learning solution ac
 
 ![avg20_comparison_analytic_model](Images/avg20_comparison_analytic_model.png)
 
-Note that variability is a nonlinear function of the temporal resolution. This is because very small and very small timesteps are easy to control: in the former, only one molecule decays at most, while in the latter, almost all molecules are guaranteed to have decayed. Ensuring that the target value is met is simple because the source of the randomness (decays) is very small.
+Note that variability is a nonlinear function of the temporal resolution. This is because very small and very large timesteps are easy to control: in the former, only one molecule decays at most, while in the latter, almost all molecules are guaranteed to have decayed. Ensuring that the target value is met is simple because the source of the randomness (decays) is very small.
 
 However, this large timestep limit is not very useful - it is an artifact of how we've chosen to implement our simulation, and the low variability in this case is not useful for actual control problems. Thus for further analysis, we stick to analyzing across a variety of averages with a modest timestep ($dt = 0.5$)
 
@@ -128,11 +128,11 @@ This is most apparent if we plot the optimal actions of our controller in the ca
 
 ![action_values_lagg1_history1](Images/action_values_lagg1_history1.png)
 
-Although the change in controller behaviour is striking, the performance gain is less obvious.
+Although the change in controller behaviour is striking, the performance gain is more subtle.
 
 ![Lagg1_With_History_dt05](Images/Lagg1_With_History_dt05.png)
 
-The controllers using additional observations (History 1, 2, and 1 2) perform somewhat better than the controller trained on only the latest observation, but the more complex controllers do worse at larger averages, suggesting that they require more training time (because of the larger state space for larger averages and complex controllers). We can more accurately evaluate the performance of the controllers by comparing the results at a small average, such as an average of 5:
+The controllers using additional observations (History 1, 2, and 1 2) perform somewhat better than the controller trained on only the latest observation, but the more complex controllers do worse at larger averages, suggesting that they require more training time (because of the larger state space for larger averages and complex controllers). We can more accurately evaluate the performance gain from history dependent controllers by comparing the results at a small average, such as an average of 5:
 
 ![Comparison_Of_Avg5_dt05](Images/Comparison_Of_Avg5_dt05.png)
 
@@ -147,7 +147,7 @@ In general, investigating other average lengths results in a performance of slig
 Future directions to take this repo are:
 
 - Running simulations with larger training times, to see if the increase in performance is consistent across all averages
-- Comparing lookup tables with deep learning approaches which can generalize and may learn more complex controllers faster
+- Comparing lookup tables with deep learning approaches like neural nets for complex problems, as deep learning can generalize and may learn more complex controllers faster
 - More complicated gym environments to investigate more interesting questions (eg, given that we control a molecule using only the abundance of a downstream molecule, what is the optimal lifetime ratio of the downstream molecule relative to the fluctuations of the controlled molecule to make the best controllers? This may have biological implications for the optimal lifetime of reporter molecules.)
 
 
