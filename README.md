@@ -10,9 +10,9 @@ __Above__: A diagram of the stochastic simulation. At each timestep, molecules d
 
 This work is based off knowledge in the stochastic molecular dynamics community that [control schemes based on the entire history of molecular levels offer superior performance to controllers that only act based on instantaneous values](https://www.nature.com/articles/nature09333). These control mechanisms are difficult to derive analytically. Instead, we implemented a history-dependent control mechanism via reinforcement learning. Compared to the lagg-free optimal controller for this problem, we find the variance of a delayed controller can be reduced by up to 14% by predicting based off the past 3 observations instead of only the most recent value.
 
-__Below__: A control mechanism (learned via machine learning) with delays can more effectively approach the performance of the optimal no-delay controller by using histories of molecular trajectories, indicated by the purple dots below the blue dots.
-
 ![Comparison of Avg5 dt05](Images/Comparison_Of_Avg5_dt05.png)
+
+__Above__: A control mechanism (learned via machine learning) with delays can more effectively approach the performance of the optimal no-delay controller by using histories of molecular trajectories, indicated by the purple dots below the blue dots.
 
 # How To Use
 
