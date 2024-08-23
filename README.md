@@ -4,7 +4,7 @@ This repo contains code for implementing a 1D stochastic molecule simulation wit
 
 It also contains example programs used to investigate the utility of reinforcement learning in understanding control of stochastic molecular dynamics.
 
-![OneMoleculeDiagram](Images/OneMoleculeDiagram.png)
+![OneMoleculeDiagram2](Images/OneMoleculeDiagram.png)
 
 Pictured above is a diagram of the stochastic simulation. At each timestep, molecules decay with probability $p$ resulting in a binomial distribution of death events, and a controller attempts to maintain a constant average by sending in inputs based off a series of past observations of the molecular levels.
 
