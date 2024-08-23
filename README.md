@@ -34,9 +34,7 @@ Reducing variability is a common goal in many control applications. In this repo
 
 This problem can be analytically solved in the case where the controller observes exactly the current number of molecules before making it's decision for the next timestep, where the optimal number of molecules to send in at timestep k, $A_k$ is given by the closest integer to
 
-\begin{equation}
-A_{k, cont.} = B - N_{k}(1 - p)
-\end{equation}
+$A_{k, cont.} = B - N_{k}(1 - p)$
 
 obtained by minimizing expected value of the squared difference. This intuitively implies the number of molecules made should compensate for the average number of molecules lost. Unfortunately, analytically solving for the average error is difficult, and one must use numerical simulations. For the proof, see folder "Theoretical Results".
 
