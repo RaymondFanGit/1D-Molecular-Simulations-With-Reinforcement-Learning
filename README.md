@@ -55,8 +55,8 @@ Reinforcement learning requires an environment - in this case, a simulation of t
 - dt, the time between observations
 - The maximum number of steps to run the simulation for
 - The length of history of the molecule's abundances
-- the target value
-- the maximum number of molecules allowed in the system
+- The target value
+- The maximum number of molecules allowed in the system
 
 which is used to compute the probability a molecule does not decay $p = exp(-dt/t_{mol})$. At every step, it takes in an action by the controller, and computes the number of molecules that have decayed since the last observation (drawn from a binomial with probability $p$ before adding in the action. It returns the history of the molecules abundances, the reward (negative squared difference between the current value and the target), and the actual optimal number of molecules to send in, along with some generic flags for gymnasium libraries.
 
