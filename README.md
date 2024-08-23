@@ -62,7 +62,7 @@ which is used to compute the probability a molecule does not decay $p = exp(-dt/
 
 ### Neural Networks
 
-The network learns using the loss, given by the squared difference between the network's taken action and the optimal action. This network is capable of learning, but comparing it to the analytic optimal controller for this problem reveals that it consistently does worse than the optimal solution, and furthermore it's performance does not improve with more training. This is a common problem in the field of deep reinforcement learning (catastrophic forgetting)/
+The network learns using the loss, given by the squared difference between the network's taken action and the optimal action. This network is capable of learning, but comparing it to the analytic optimal controller for this problem reveals that it consistently does worse than the optimal solution, and furthermore it's performance does not improve with more training. This is a common problem in the field of deep reinforcement learning (catastrophic forgetting).
 
 ![Neural_Nets_Get_Worse](Images/Neural_Nets_Get_Worse.png)
 
